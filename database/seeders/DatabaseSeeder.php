@@ -19,18 +19,10 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Administrator',
-            'email' => 'admin@sijenggung.desa.id',
+            'email' => 'admin@sijenggung.web.id',
             'password' => bcrypt('password'),
             'role' => 'admin',
         ]);
 
-        User::factory()->create([
-            'name' => 'Pegawai Tester',
-            'email' => 'pegawai@sijenggung.desa.id',
-            'password' => bcrypt('password'),
-            'role' => 'pegawai',
-            'nip' => '198501012010121001',
-            'jabatan' => 'Kaur Keuangan',
-        ]);
     }
 }

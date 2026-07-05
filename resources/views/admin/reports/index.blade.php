@@ -71,7 +71,8 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Masuk</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Pulang</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Masuk</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Pulang</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -89,11 +90,27 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
-                                        @if($record->latitude && $record->longitude)
-                                            <a href="https://www.openstreetmap.org/?mlat={{ $record->latitude }}&mlon={{ $record->longitude }}#map=17/{{ $record->latitude }}/{{ $record->longitude }}" 
-                                               target="_blank" class="text-emerald-600 hover:text-emerald-800 underline text-xs">
-                                                📍 Peta
-                                            </a>
+                                        @if($record->check_in_latitude && $record->check_in_longitude)
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-gray-500">{{ number_format($record->check_in_latitude, 5) }}, {{ number_format($record->check_in_longitude, 5) }}</span>
+                                                <a href="https://www.openstreetmap.org/?mlat={{ $record->check_in_latitude }}&mlon={{ $record->check_in_longitude }}#map=17/{{ $record->check_in_latitude }}/{{ $record->check_in_longitude }}" 
+                                                   target="_blank" class="text-emerald-600 hover:text-emerald-800 underline text-xs mt-1">
+                                                    📍 Peta
+                                                </a>
+                                            </div>
+                                        @else
+                                            <span class="text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3 text-sm">
+                                        @if($record->check_out_latitude && $record->check_out_longitude)
+                                            <div class="flex flex-col">
+                                                <span class="text-xs text-gray-500">{{ number_format($record->check_out_latitude, 5) }}, {{ number_format($record->check_out_longitude, 5) }}</span>
+                                                <a href="https://www.openstreetmap.org/?mlat={{ $record->check_out_latitude }}&mlon={{ $record->check_out_longitude }}#map=17/{{ $record->check_out_latitude }}/{{ $record->check_out_longitude }}" 
+                                                   target="_blank" class="text-emerald-600 hover:text-emerald-800 underline text-xs mt-1">
+                                                    📍 Peta
+                                                </a>
+                                            </div>
                                         @else
                                             <span class="text-gray-400">-</span>
                                         @endif
@@ -101,7 +118,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="px-4 py-8 text-sm text-gray-500 text-center">
+                                    <td colspan="9" class="px-4 py-8 text-sm text-gray-500 text-center">
                                         Belum ada data presensi untuk bulan ini.
                                     </td>
                                 </tr>

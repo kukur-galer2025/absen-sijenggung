@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->decimal('latitude', 10, 7)->nullable()->after('check_out');
-            $table->decimal('longitude', 10, 7)->nullable()->after('latitude');
+            $table->decimal('check_in_latitude', 10, 7)->nullable();
+            $table->decimal('check_in_longitude', 10, 7)->nullable();
+            $table->decimal('check_out_latitude', 10, 7)->nullable();
+            $table->decimal('check_out_longitude', 10, 7)->nullable();
         });
     }
 
@@ -23,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->dropColumn(['latitude', 'longitude']);
+            $table->dropColumn(['check_in_latitude', 'check_in_longitude', 'check_out_latitude', 'check_out_longitude']);
         });
     }
 };

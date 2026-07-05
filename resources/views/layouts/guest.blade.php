@@ -29,7 +29,7 @@
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-8 px-8 py-10 bg-white/80 backdrop-blur-md shadow-2xl overflow-hidden sm:rounded-2xl border border-white/40">
+            <div class="w-11/12 sm:w-full sm:max-w-md mt-8 px-6 py-8 sm:px-8 sm:py-10 bg-white/80 backdrop-blur-md shadow-2xl overflow-hidden rounded-2xl border border-white/40">
                 {{ $slot }}
             </div>
         </div>

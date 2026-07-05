@@ -11,20 +11,17 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->user()->role !== 'admin') abort(403);
         $employees = User::where('role', 'pegawai')->get();
         return view('admin.employees.index', compact('employees'));
     }
 
     public function create(Request $request)
     {
-        if ($request->user()->role !== 'admin') abort(403);
         return view('admin.employees.create');
     }
 
     public function store(Request $request)
     {
-        if ($request->user()->role !== 'admin') abort(403);
         
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -48,13 +45,11 @@ class EmployeeController extends Controller
 
     public function edit(Request $request, User $employee)
     {
-        if ($request->user()->role !== 'admin') abort(403);
         return view('admin.employees.edit', compact('employee'));
     }
 
     public function update(Request $request, User $employee)
     {
-        if ($request->user()->role !== 'admin') abort(403);
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -79,7 +74,6 @@ class EmployeeController extends Controller
 
     public function destroy(Request $request, User $employee)
     {
-        if ($request->user()->role !== 'admin') abort(403);
         $employee->delete();
         return redirect()->route('employees.index')->with('success', 'Pegawai berhasil dihapus.');
     }

@@ -97,7 +97,8 @@
                 <th>Jam Masuk</th>
                 <th>Jam Pulang</th>
                 <th>Status</th>
-                <th>Koordinat</th>
+                <th>Lokasi Masuk</th>
+                <th>Lokasi Pulang</th>
             </tr>
         </thead>
         <tbody>
@@ -112,8 +113,15 @@
                 <td>{{ $record->check_out ?? '-' }}</td>
                 <td><span class="status-{{ strtolower($record->status) == 'hadir' ? 'hadir' : (strtolower($record->status) == 'terlambat' ? 'terlambat' : 'hadir') }}">{{ ucfirst($record->status) }}</span></td>
                 <td>
-                    @if($record->latitude && $record->longitude)
-                        {{ number_format($record->latitude, 5) }}, {{ number_format($record->longitude, 5) }}
+                    @if($record->check_in_latitude && $record->check_in_longitude)
+                        {{ number_format($record->check_in_latitude, 5) }}, {{ number_format($record->check_in_longitude, 5) }}
+                    @else
+                        -
+                    @endif
+                </td>
+                <td>
+                    @if($record->check_out_latitude && $record->check_out_longitude)
+                        {{ number_format($record->check_out_latitude, 5) }}, {{ number_format($record->check_out_longitude, 5) }}
                     @else
                         -
                     @endif
@@ -121,7 +129,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="9" style="text-align: center; padding: 20px; color: #999;">Tidak ada data presensi untuk periode ini.</td>
+                <td colspan="10" style="text-align: center; padding: 20px; color: #999;">Tidak ada data presensi untuk periode ini.</td>
             </tr>
             @endforelse
         </tbody>

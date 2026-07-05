@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use App\Models\Setting;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -51,11 +52,25 @@ class AttendanceController extends Controller
         return false;
     }
 
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        
+        // Employee sees their own today's status
+        $todayAttendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', Carbon::today())
+            ->first();
+            
+        $deadline = Setting::where('key', 'attendance_deadline')->value('value') ?? '08:00';
+            
+        return view('attendance.index', compact('todayAttendance', 'deadline'));
+    }
+
     public function checkIn(Request $request)
     {
         $request->validate([
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
         ]);
 
         // Cek radius lokasi
@@ -77,15 +92,18 @@ class AttendanceController extends Controller
         }
 
         $now = Carbon::now();
-        $status = $now->format('H:i:s') > '08:00:00' ? 'terlambat' : 'hadir';
+        $deadlineTime = Setting::where('key', 'attendance_deadline')->value('value') ?? '08:00';
+        $deadlineFormatted = \Carbon\Carbon::createFromFormat('H:i', $deadlineTime)->format('H:i:s');
+
+        $status = $now->format('H:i:s') > $deadlineFormatted ? 'terlambat' : 'hadir';
 
         Attendance::create([
             'user_id' => $user->id,
             'date' => $today,
             'check_in' => $now->format('H:i:s'),
             'status' => $status,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
+            'check_in_latitude' => $request->latitude,
+            'check_in_longitude' => $request->longitude,
         ]);
 
         $statusMsg = $status == 'terlambat' ? ' (Anda Terlambat)' : ' (Tepat Waktu)';
@@ -95,8 +113,8 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         $request->validate([
-            'latitude' => ['nullable', 'numeric'],
-            'longitude' => ['nullable', 'numeric'],
+            'latitude' => ['required', 'numeric'],
+            'longitude' => ['required', 'numeric'],
         ]);
 
         // Cek radius lokasi
@@ -122,8 +140,8 @@ class AttendanceController extends Controller
 
         $attendance->update([
             'check_out' => Carbon::now()->format('H:i:s'),
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
+            'check_out_latitude' => $request->latitude,
+            'check_out_longitude' => $request->longitude,
         ]);
 
         return back()->with('success', 'Berhasil absen pulang pada ' . Carbon::now()->format('H:i:s') . ' WIB.');

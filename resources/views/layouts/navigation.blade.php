@@ -16,6 +16,10 @@
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('dashboard') ? 'border-amber-400 text-white' : 'border-transparent text-emerald-100 hover:text-white hover:border-emerald-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
                         {{ __('Dashboard') }}
                     </a>
+                    
+                    <a href="{{ route('attendance.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('attendance.*') ? 'border-amber-400 text-white' : 'border-transparent text-emerald-100 hover:text-white hover:border-emerald-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                        {{ __('Presensi') }}
+                    </a>
 
                     @if(Auth::user()->role === 'admin')
                         <a href="{{ route('employees.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('employees.*') ? 'border-amber-400 text-white' : 'border-transparent text-emerald-100 hover:text-white hover:border-emerald-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
@@ -23,6 +27,9 @@
                         </a>
                         <a href="{{ route('reports.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('reports.*') ? 'border-amber-400 text-white' : 'border-transparent text-emerald-100 hover:text-white hover:border-emerald-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
                             {{ __('Laporan') }}
+                        </a>
+                        <a href="{{ route('settings.index') }}" class="inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('settings.*') ? 'border-amber-400 text-white' : 'border-transparent text-emerald-100 hover:text-white hover:border-emerald-300' }} text-sm font-medium leading-5 transition duration-150 ease-in-out">
+                            {{ __('Pengaturan') }}
                         </a>
                     @endif
                 </div>
@@ -81,12 +88,19 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
+            <x-responsive-nav-link :href="route('attendance.index')" :active="request()->routeIs('attendance.*')">
+                {{ __('Presensi') }}
+            </x-responsive-nav-link>
+            
             @if(Auth::user()->role === 'admin')
                 <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                     {{ __('Manajemen Pegawai') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
                     {{ __('Laporan') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')">
+                    {{ __('Pengaturan') }}
                 </x-responsive-nav-link>
             @endif
         </div>
