@@ -1,0 +1,152 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Attendance;
+use Carbon\Carbon;
+
+class AttendanceController extends Controller
+{
+    // Koordinat Kantor Balai Desa Sijenggung, Banjarmangu, Banjarnegara
+    const OFFICE_LAT = -7.292740;
+    const OFFICE_LNG = 109.667997;
+    const MAX_RADIUS_KM = 70; // Maksimal 70 km dari kantor desa
+
+    /**
+     * Hitung jarak antara dua titik koordinat menggunakan formula Haversine (dalam km)
+     */
+    private function haversineDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371; // Radius bumi dalam km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
+    }
+
+    /**
+     * Validasi apakah lokasi masih dalam radius yang diizinkan
+     */
+    private function validateLocation(Request $request)
+    {
+        if ($request->latitude && $request->longitude) {
+            $distance = $this->haversineDistance(
+                self::OFFICE_LAT, self::OFFICE_LNG,
+                $request->latitude, $request->longitude
+            );
+
+            if ($distance > self::MAX_RADIUS_KM) {
+                return round($distance, 1);
+            }
+        }
+
+        return false;
+    }
+
+    public function checkIn(Request $request)
+    {
+        $request->validate([
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+        ]);
+
+        // Cek radius lokasi
+        $overDistance = $this->validateLocation($request);
+        if ($overDistance !== false) {
+            return back()->with('error', "Anda berada di luar radius absensi ({$overDistance} km dari kantor desa). Maksimal {self::MAX_RADIUS_KM} km.");
+        }
+
+        $user = $request->user();
+        $today = Carbon::today();
+
+        // Check if already checked in
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if ($attendance) {
+            return back()->with('error', 'Anda sudah melakukan absen masuk hari ini.');
+        }
+
+        $now = Carbon::now();
+        $status = $now->format('H:i:s') > '08:00:00' ? 'terlambat' : 'hadir';
+
+        Attendance::create([
+            'user_id' => $user->id,
+            'date' => $today,
+            'check_in' => $now->format('H:i:s'),
+            'status' => $status,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        $statusMsg = $status == 'terlambat' ? ' (Anda Terlambat)' : ' (Tepat Waktu)';
+        return back()->with('success', 'Berhasil absen masuk pada ' . $now->format('H:i:s') . ' WIB' . $statusMsg . '.');
+    }
+
+    public function checkOut(Request $request)
+    {
+        $request->validate([
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+        ]);
+
+        // Cek radius lokasi
+        $overDistance = $this->validateLocation($request);
+        if ($overDistance !== false) {
+            return back()->with('error', "Anda berada di luar radius absensi ({$overDistance} km dari kantor desa). Maksimal " . self::MAX_RADIUS_KM . " km.");
+        }
+
+        $user = $request->user();
+        $today = Carbon::today();
+
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            return back()->with('error', 'Anda belum absen masuk hari ini.');
+        }
+
+        if ($attendance->check_out) {
+            return back()->with('error', 'Anda sudah melakukan absen pulang.');
+        }
+
+        $attendance->update([
+            'check_out' => Carbon::now()->format('H:i:s'),
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+        ]);
+
+        return back()->with('success', 'Berhasil absen pulang pada ' . Carbon::now()->format('H:i:s') . ' WIB.');
+    }
+
+    /**
+     * Reset presensi hari ini (pegawai bisa ulang jika salah)
+     */
+    public function reset(Request $request)
+    {
+        $user = $request->user();
+        $today = Carbon::today();
+
+        $attendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today)
+            ->first();
+
+        if (!$attendance) {
+            return back()->with('error', 'Tidak ada data presensi hari ini untuk direset.');
+        }
+
+        $attendance->delete();
+
+        return back()->with('success', 'Presensi hari ini berhasil direset. Silakan lakukan presensi ulang.');
+    }
+}
