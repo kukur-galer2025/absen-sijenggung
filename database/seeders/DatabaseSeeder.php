@@ -17,11 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        User::create([
             'name' => 'Administrator',
             'email' => 'admin@sijenggung.web.id',
             'password' => bcrypt('password'),
             'role' => 'admin',
+            'nip' => '1234567890',
+            'jabatan' => 'Admin Sistem',
         ]);
 
     }
