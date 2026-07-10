@@ -69,7 +69,9 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Nama Pegawai</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">NIP</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Masuk</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Masuk</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Pulang</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Pulang</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Status</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Masuk</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Pulang</th>
@@ -83,7 +85,25 @@
                                     <td class="px-4 py-3 text-sm text-gray-900">{{ $record->user->name }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-500">{{ $record->user->nip ?? '-' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900">{{ $record->check_in ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm">
+                                        @if($record->check_in_photo)
+                                            <a href="{{ Storage::url($record->check_in_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_in_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-sm text-gray-900">{{ $record->check_out ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-sm">
+                                        @if($record->check_out_photo)
+                                            <a href="{{ Storage::url($record->check_out_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_out_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
                                         <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ strtolower($record->status) == 'terlambat' ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-800' }}">
                                             {{ ucfirst($record->status) }}
@@ -118,7 +138,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="px-4 py-8 text-sm text-gray-500 text-center">
+                                    <td colspan="11" class="px-4 py-8 text-sm text-gray-500 text-center">
                                         Belum ada data presensi untuk bulan ini.
                                     </td>
                                 </tr>

@@ -71,6 +71,7 @@ class AttendanceController extends Controller
         $request->validate([
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
+            'photo' => ['required', 'string', 'starts_with:data:image/', 'max:2000000'],
         ]);
 
         // Cek radius lokasi
@@ -97,6 +98,24 @@ class AttendanceController extends Controller
 
         $status = $now->format('H:i:s') > $deadlineFormatted ? 'terlambat' : 'hadir';
 
+        $photoPath = null;
+        if ($request->photo) {
+            $imageParts = explode(";base64,", $request->photo);
+            if (count($imageParts) == 2) {
+                $imageBase64 = base64_decode($imageParts[1]);
+
+                // Deep Image Verification
+                $imageInfo = @getimagesizefromstring($imageBase64);
+                if (!$imageInfo || !in_array($imageInfo[2], [IMAGETYPE_WEBP, IMAGETYPE_JPEG, IMAGETYPE_PNG])) {
+                    return back()->with('error', 'Keamanan: Format foto tidak valid atau terdeteksi manipulasi file berbahaya!');
+                }
+
+                $imageName = $user->id . '_' . time() . '_in.webp';
+                \Illuminate\Support\Facades\Storage::disk('public')->put('attendances/' . $imageName, $imageBase64);
+                $photoPath = 'attendances/' . $imageName;
+            }
+        }
+
         Attendance::create([
             'user_id' => $user->id,
             'date' => $today,
@@ -104,6 +123,7 @@ class AttendanceController extends Controller
             'status' => $status,
             'check_in_latitude' => $request->latitude,
             'check_in_longitude' => $request->longitude,
+            'check_in_photo' => $photoPath,
         ]);
 
         $statusMsg = $status == 'terlambat' ? ' (Anda Terlambat)' : ' (Tepat Waktu)';
@@ -115,6 +135,7 @@ class AttendanceController extends Controller
         $request->validate([
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
+            'photo' => ['required', 'string', 'starts_with:data:image/', 'max:2000000'],
         ]);
 
         // Cek radius lokasi
@@ -138,10 +159,29 @@ class AttendanceController extends Controller
             return back()->with('error', 'Anda sudah melakukan absen pulang.');
         }
 
+        $photoPath = null;
+        if ($request->photo) {
+            $imageParts = explode(";base64,", $request->photo);
+            if (count($imageParts) == 2) {
+                $imageBase64 = base64_decode($imageParts[1]);
+
+                // Deep Image Verification
+                $imageInfo = @getimagesizefromstring($imageBase64);
+                if (!$imageInfo || !in_array($imageInfo[2], [IMAGETYPE_WEBP, IMAGETYPE_JPEG, IMAGETYPE_PNG])) {
+                    return back()->with('error', 'Keamanan: Format foto tidak valid atau terdeteksi manipulasi file berbahaya!');
+                }
+
+                $imageName = $user->id . '_' . time() . '_out.webp';
+                \Illuminate\Support\Facades\Storage::disk('public')->put('attendances/' . $imageName, $imageBase64);
+                $photoPath = 'attendances/' . $imageName;
+            }
+        }
+
         $attendance->update([
             'check_out' => Carbon::now()->format('H:i:s'),
             'check_out_latitude' => $request->latitude,
             'check_out_longitude' => $request->longitude,
+            'check_out_photo' => $photoPath,
         ]);
 
         return back()->with('success', 'Berhasil absen pulang pada ' . Carbon::now()->format('H:i:s') . ' WIB.');

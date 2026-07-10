@@ -51,7 +51,9 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Tanggal</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Masuk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Masuk</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Pulang</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Pulang</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Masuk</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi Pulang</th>
@@ -62,7 +64,25 @@
                                 <tr class="hover:bg-stone-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $record->date->translatedFormat('d M Y') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->check_in ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($record->check_in_photo)
+                                            <a href="{{ Storage::url($record->check_in_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_in_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->check_out ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($record->check_out_photo)
+                                            <a href="{{ Storage::url($record->check_out_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_out_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ strtolower($record->status) == 'terlambat' ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-800' }}">
                                             {{ ucfirst($record->status) }}
@@ -101,7 +121,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-8 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    <td colspan="8" class="px-6 py-8 whitespace-nowrap text-sm text-gray-500 text-center">
                                         <div class="flex flex-col items-center">
                                             <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                             Belum ada riwayat absensi.

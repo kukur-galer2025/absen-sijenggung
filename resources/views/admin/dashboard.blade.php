@@ -69,7 +69,9 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Nama Pegawai</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Masuk</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Masuk</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Jam Pulang</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Foto Pulang</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase tracking-wider">Lokasi</th>
                                 </tr>
@@ -91,28 +93,55 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->check_in ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($record->check_in_photo)
+                                            <a href="{{ Storage::url($record->check_in_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_in_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->check_out ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($record->check_out_photo)
+                                            <a href="{{ Storage::url($record->check_out_photo) }}" target="_blank">
+                                                <img src="{{ Storage::url($record->check_out_photo) }}" class="h-10 w-10 object-cover rounded shadow-sm border border-gray-200">
+                                            </a>
+                                        @else
+                                            <span class="text-gray-400 text-xs">-</span>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ strtolower($record->status) == 'terlambat' ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-800' }}">
                                             {{ ucfirst($record->status) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($record->latitude && $record->longitude)
-                                            <a href="https://www.openstreetmap.org/?mlat={{ $record->latitude }}&mlon={{ $record->longitude }}#map=17/{{ $record->latitude }}/{{ $record->longitude }}" 
-                                               target="_blank" 
-                                               class="text-emerald-600 hover:text-emerald-800 underline flex items-center">
-                                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
-                                                Lihat Peta
-                                            </a>
-                                        @else
-                                            <span class="text-gray-400">-</span>
-                                        @endif
+                                        <div class="flex flex-col space-y-1">
+                                            @if($record->check_in_latitude && $record->check_in_longitude)
+                                                <a href="https://www.openstreetmap.org/?mlat={{ $record->check_in_latitude }}&mlon={{ $record->check_in_longitude }}#map=17/{{ $record->check_in_latitude }}/{{ $record->check_in_longitude }}" 
+                                                   target="_blank" class="text-emerald-600 hover:text-emerald-800 underline text-xs flex items-center">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                                    Peta Masuk
+                                                </a>
+                                            @endif
+                                            @if($record->check_out_latitude && $record->check_out_longitude)
+                                                <a href="https://www.openstreetmap.org/?mlat={{ $record->check_out_latitude }}&mlon={{ $record->check_out_longitude }}#map=17/{{ $record->check_out_latitude }}/{{ $record->check_out_longitude }}" 
+                                                   target="_blank" class="text-emerald-600 hover:text-emerald-800 underline text-xs flex items-center">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                                                    Peta Pulang
+                                                </a>
+                                            @endif
+                                            @if(!$record->check_in_latitude && !$record->check_out_latitude)
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-8 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    <td colspan="7" class="px-6 py-8 whitespace-nowrap text-sm text-gray-500 text-center">
                                         <div class="flex flex-col items-center">
                                             <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                             Belum ada pegawai yang absen hari ini.

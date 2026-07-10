@@ -95,7 +95,9 @@
                 <th>NIP</th>
                 <th>Jabatan</th>
                 <th>Jam Masuk</th>
+                <th>Foto Masuk</th>
                 <th>Jam Pulang</th>
+                <th>Foto Pulang</th>
                 <th>Status</th>
                 <th>Lokasi Masuk</th>
                 <th>Lokasi Pulang</th>
@@ -110,7 +112,21 @@
                 <td>{{ $record->user->nip ?? '-' }}</td>
                 <td>{{ $record->user->jabatan ?? '-' }}</td>
                 <td>{{ $record->check_in ?? '-' }}</td>
+                <td style="text-align: center;">
+                    @if($record->check_in_photo && file_exists(storage_path('app/public/' . $record->check_in_photo)))
+                        <img src="data:image/webp;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . $record->check_in_photo))) }}" style="width: 35px; height: 35px; border-radius: 4px;">
+                    @else
+                        -
+                    @endif
+                </td>
                 <td>{{ $record->check_out ?? '-' }}</td>
+                <td style="text-align: center;">
+                    @if($record->check_out_photo && file_exists(storage_path('app/public/' . $record->check_out_photo)))
+                        <img src="data:image/webp;base64,{{ base64_encode(file_get_contents(storage_path('app/public/' . $record->check_out_photo))) }}" style="width: 35px; height: 35px; border-radius: 4px;">
+                    @else
+                        -
+                    @endif
+                </td>
                 <td><span class="status-{{ strtolower($record->status) == 'hadir' ? 'hadir' : (strtolower($record->status) == 'terlambat' ? 'terlambat' : 'hadir') }}">{{ ucfirst($record->status) }}</span></td>
                 <td>
                     @if($record->check_in_latitude && $record->check_in_longitude)
@@ -129,7 +145,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="10" style="text-align: center; padding: 20px; color: #999;">Tidak ada data presensi untuk periode ini.</td>
+                <td colspan="12" style="text-align: center; padding: 20px; color: #999;">Tidak ada data presensi untuk periode ini.</td>
             </tr>
             @endforelse
         </tbody>

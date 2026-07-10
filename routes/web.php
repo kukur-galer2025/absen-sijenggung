@@ -19,8 +19,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware('auth')->group(function () {
     // Presensi
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.checkIn');
-    Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.checkOut');
+    Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn'])->middleware('throttle:5,1')->name('attendance.checkIn');
+    Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut'])->middleware('throttle:5,1')->name('attendance.checkOut');
     Route::post('/attendance/reset', [AttendanceController::class, 'reset'])->name('attendance.reset');
 
     // Manajemen Pegawai, Laporan & Pengaturan (Khusus Admin)

@@ -40,7 +40,8 @@
                                 @csrf
                                 <input type="hidden" name="latitude" id="checkin-lat">
                                 <input type="hidden" name="longitude" id="checkin-lng">
-                                <button type="submit" id="btn-check-in"
+                                <input type="hidden" name="photo" id="checkin-photo">
+                                <button type="button" id="btn-check-in"
                                         class="w-full md:w-auto px-5 py-3 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-75 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                         disabled>
                                     @if($todayAttendance)
@@ -56,7 +57,8 @@
                                 @csrf
                                 <input type="hidden" name="latitude" id="checkout-lat">
                                 <input type="hidden" name="longitude" id="checkout-lng">
-                                <button type="submit" id="btn-check-out"
+                                <input type="hidden" name="photo" id="checkout-photo">
+                                <button type="button" id="btn-check-out"
                                         class="w-full md:w-auto px-5 py-3 bg-amber-500 text-white font-semibold rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-75 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                         disabled>
                                     @if($todayAttendance && $todayAttendance->check_out)
@@ -78,6 +80,22 @@
                                 </form>
                             @endif
                         </div>
+                    </div>
+
+                    <!-- Camera UI -->
+                    <div class="mt-6 mb-4">
+                        <div class="relative w-full max-w-sm mx-auto rounded-lg overflow-hidden bg-black flex justify-center items-center shadow-inner" style="aspect-ratio: 3/4;">
+                            <video id="webcam" class="absolute w-full h-full object-cover -scale-x-100" autoplay playsinline></video>
+                            <canvas id="canvas" class="hidden"></canvas>
+                            <div id="camera-loading" class="text-white absolute z-10 flex flex-col items-center">
+                                <svg class="animate-spin h-8 w-8 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-sm">Menghidupkan kamera...</span>
+                            </div>
+                        </div>
+                        <p class="text-center text-xs text-gray-500 mt-2">Pastikan wajah terlihat jelas di kamera saat absen.</p>
                     </div>
 
                     <!-- GPS Status -->
@@ -260,6 +278,61 @@
                 '<span class="text-red-600">Browser tidak mendukung GPS.</span>';
         }
 
+        // Setup Camera
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const cameraLoading = document.getElementById('camera-loading');
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = function(e) {
+                        video.play();
+                        cameraLoading.style.display = 'none';
+                    };
+                })
+                .catch(function(err) {
+                    console.log("Error accessing camera: ", err);
+                    cameraLoading.innerHTML = '<span class="text-red-400 text-sm">Gagal mengakses kamera.</span>';
+                });
+        }
+
+        function takeSnapshot() {
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // Convert to WEBP
+            return canvas.toDataURL('image/webp', 0.8);
+        }
+
+        const btnCheckIn = document.getElementById('btn-check-in');
+        if (btnCheckIn) {
+            btnCheckIn.addEventListener('click', function(e) {
+                if (btnCheckIn.disabled) return;
+                const photoData = takeSnapshot();
+                document.getElementById('checkin-photo').value = photoData;
+                btnCheckIn.disabled = true;
+                btnCheckIn.innerHTML = 'Memproses...';
+                document.getElementById('form-check-in').submit();
+            });
+        }
+
+        const btnCheckOut = document.getElementById('btn-check-out');
+        if (btnCheckOut) {
+            btnCheckOut.addEventListener('click', function(e) {
+                if (btnCheckOut.disabled) return;
+                const photoData = takeSnapshot();
+                document.getElementById('checkout-photo').value = photoData;
+                btnCheckOut.disabled = true;
+                btnCheckOut.innerHTML = 'Memproses...';
+                document.getElementById('form-check-out').submit();
+            });
+        }
+
         // SweetAlert2 Confirmation for Reset
         const btnReset = document.getElementById('btn-reset');
         if (btnReset) {
@@ -285,6 +358,16 @@
                 });
             });
         }
+
+        // Anti-Tamper: Mencegah Klik Kanan & Shortcut Inspect Element (F12, Ctrl+U, dll)
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', function (event) {
+            if (event.keyCode === 123 || 
+               (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74 || event.keyCode === 67)) || 
+               (event.ctrlKey && event.keyCode === 85)) {
+                event.preventDefault();
+            }
+        });
     </script>
     @endpush
 </x-app-layout>
